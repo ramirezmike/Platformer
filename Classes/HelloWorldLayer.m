@@ -40,15 +40,18 @@
 	// always call "super" init
 	// Apple recommends to re-assign "self" with the "super" return value
 	if( (self=[super initWithColor:ccc4(255,255,255,255)])) {
-		CGSize screenSize = [[CCDirector sharedDirector] winSize];	
+		screenSize = [[CCDirector sharedDirector] winSize];	
 		player = [CCSprite spriteWithFile:@"player.png"];
 		player.position = ccp(screenSize.width/2,screenSize.height/4);
 		
 		playerAcceleration = 0.046875;
 		playerFriction = 0.046875;
+		playerGravity = -0.21875;
 		playerDeceleration = 0.5;
+		playerJumpVelocity = 6.5;
 		playerMaxSpeed = 6;
 		playerSpeed = 0;
+		playerVerticalSpeed = 0;
 		
 		leftButton = [CCMenuItemSpriteHoldable
 		itemFromNormalSprite:[CCSprite spriteWithFile:@"Icon-Small.png"] selectedSprite:
@@ -56,11 +59,15 @@
 		rightButton = [CCMenuItemSpriteHoldable
 		itemFromNormalSprite:[CCSprite spriteWithFile:@"Icon-Small.png"] selectedSprite:
 			[CCSprite spriteWithFile:@"Icon-Small-50.png"]target:self selector:@selector(buttonTapped:)];
+		jumpButton = [CCMenuItemSpriteHoldable
+		itemFromNormalSprite:[CCSprite spriteWithFile:@"Icon-Small.png"] selectedSprite:
+			[CCSprite spriteWithFile:@"Icon-Small-50.png"]target:self selector:@selector(buttonTapped:)];
 		
-		leftButton.position = ccp(screenSize.width/2 - 40,40);
-		rightButton.position = ccp(screenSize.width/2 + 40,40);
-		
-		CCMenu *debugMenu = [CCMenu menuWithItems:leftButton,rightButton, nil];
+		leftButton.position = ccp(40,40);
+		rightButton.position = ccp(80,40);
+		jumpButton.position = ccp(320-40,40);
+
+		CCMenu *debugMenu = [CCMenu menuWithItems:leftButton,rightButton, jumpButton, nil];
 		debugMenu.position = CGPointZero;
 		
 		[self addChild:debugMenu];
@@ -74,8 +81,36 @@
 
 -(void)nextFrame:(ccTime)dt
 {
-		if (!leftButton.buttonHeld && abs(playerSpeed) > 0 && !rightButton.buttonHeld) 
-		{
+		[self playerFrictionCheck];
+		[self playerMovementCheck];
+		[self playerJumpCheck];
+		[self gravityCheck];
+		[self wallBoundriesCheck];
+
+}
+
+-(void)gravityCheck
+{
+	if (player.position.y > screenSize.height/4) 
+	{
+		playerVerticalSpeed = playerVerticalSpeed + playerGravity;
+		player.position = ccp(player.position.x,player.position.y + playerVerticalSpeed);
+	}
+}
+
+-(void)playerJumpCheck
+{
+	if (jumpButton.buttonHeld) 
+	{
+		playerVerticalSpeed = 0;
+		player.position = ccp(player.position.x,player.position.y + playerJumpVelocity);
+	}
+}
+
+-(void)playerFrictionCheck
+{
+	if (!leftButton.buttonHeld && abs(playerSpeed) > 0 && !rightButton.buttonHeld) 
+	{
 			if (playerSpeed < 0) 
 			{
 				playerSpeed = playerSpeed + playerFriction;
@@ -91,10 +126,13 @@
 				playerSpeed = 0;
 			}
 			player.position = ccp(player.position.x + playerSpeed,player.position.y);
-		}
-		
-		if (leftButton.buttonHeld) 
-		{
+	}
+}
+
+-(void)playerMovementCheck
+{
+	if (leftButton.buttonHeld) 
+	{
 			if (playerSpeed <= 0) 
 			{
 				playerSpeed = playerSpeed - playerAcceleration;
@@ -111,10 +149,10 @@
 			}
 			
 			player.position = ccp( player.position.x + playerSpeed, player.position.y );
-		}
+	}
 		
-		if (rightButton.buttonHeld) 
-		{
+	if (rightButton.buttonHeld) 
+	{
 			if (playerSpeed >= 0) 
 			{
 				playerSpeed = playerSpeed + playerAcceleration;
@@ -131,17 +169,30 @@
 			}
 			
 			player.position = ccp(player.position.x + playerSpeed, player.position.y );
-		}
-		
-		if (player.position.x < -10) 
-		{
-			player.position = ccp( 480+10, player.position.y );
-		}
-		if (player.position.x > 480+10) 
-		{
-			player.position = ccp(-10,player.position.y);
-		}
+	}
 }
+
+-(void)wallBoundriesCheck
+{
+	if (player.position.x < -10) 
+	{
+		player.position = ccp( 480+10, player.position.y );
+	}
+	
+	if (player.position.x > 480+10) 
+	{
+		player.position = ccp(-10,player.position.y);
+	}
+	if (player.position.y < screenSize.height/4) 
+	{
+		player.position = ccp(player.position.x,screenSize.height/4);
+	}
+	if (player.position.y > screenSize.height - player.contentSize.height) 
+	{
+		player.position = ccp(player.position.x,screenSize.height - player.contentSize.height/2);
+	}
+}
+
 
 // on "dealloc" you need to release all your retained objects
 - (void) dealloc
