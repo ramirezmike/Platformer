@@ -67,10 +67,13 @@
 		rightButton.position = ccp(80,40);
 		jumpButton.position = ccp(320-40,40);
 
-		CCMenu *debugMenu = [CCMenu menuWithItems:leftButton,rightButton, jumpButton, nil];
+		CCMenu *debugMenu = [CCMenu menuWithItems:leftButton,rightButton, nil];
 		debugMenu.position = CGPointZero;
+		CCMenu *jumpMenu = [CCMenu menuWithItems:jumpButton, nil];
+		jumpMenu.position = CGPointZero;
 		
 		[self addChild:debugMenu];
+		[self addChild:jumpMenu];
 		[self addChild:player];
 		
 		[self schedule:@selector(nextFrame:)];
@@ -187,7 +190,7 @@
 	{
 		player.position = ccp(player.position.x,screenSize.height/4);
 	}
-	if (player.position.y > screenSize.height - player.contentSize.height) 
+	if (player.position.y > screenSize.height - player.contentSize.height/2) 
 	{
 		player.position = ccp(player.position.x,screenSize.height - player.contentSize.height/2);
 	}
