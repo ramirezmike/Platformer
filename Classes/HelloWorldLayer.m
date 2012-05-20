@@ -34,6 +34,11 @@
 
 }
 
+-(void)jumpButtonTapped:(id)sender
+{
+	//	groundY = player.position.y;
+}
+
 // on "init" you need to initialize your instance
 -(id) init
 {
@@ -52,6 +57,7 @@
 		playerMaxSpeed = 6;
 		playerSpeed = 0;
 		playerVerticalSpeed = 0;
+		playerPreviousHeight = 0;
 		
 		leftButton = [CCMenuItemSpriteHoldable
 		itemFromNormalSprite:[CCSprite spriteWithFile:@"Icon-Small.png"] selectedSprite:
@@ -61,18 +67,18 @@
 			[CCSprite spriteWithFile:@"Icon-Small-50.png"]target:self selector:@selector(buttonTapped:)];
 		jumpButton = [CCMenuItemSpriteHoldable
 		itemFromNormalSprite:[CCSprite spriteWithFile:@"Icon-Small.png"] selectedSprite:
-			[CCSprite spriteWithFile:@"Icon-Small-50.png"]target:self selector:@selector(buttonTapped:)];
+			[CCSprite spriteWithFile:@"Icon-Small-50.png"]target:self selector:@selector(jumpButtonTapped:)];
 		
 		leftButton.position = ccp(40,40);
 		rightButton.position = ccp(80,40);
 		jumpButton.position = ccp(320-40,40);
 
-		CCMenu *debugMenu = [CCMenu menuWithItems:leftButton,rightButton, nil];
-		debugMenu.position = CGPointZero;
+		CCMenu *directionMenu = [CCMenu menuWithItems:leftButton,rightButton, nil];
+		directionMenu.position = CGPointZero;
 		CCMenu *jumpMenu = [CCMenu menuWithItems:jumpButton, nil];
 		jumpMenu.position = CGPointZero;
 		
-		[self addChild:debugMenu];
+		[self addChild:directionMenu];
 		[self addChild:jumpMenu];
 		[self addChild:player];
 		
@@ -84,29 +90,67 @@
 
 -(void)nextFrame:(ccTime)dt
 {
+		[self setGround];
 		[self playerFrictionCheck];
 		[self playerMovementCheck];
+		[self playerFallCheck];
 		[self playerJumpCheck];
 		[self gravityCheck];
 		[self wallBoundriesCheck];
+		//NSLog(@"VeticalSpeed: %f",playerVerticalSpeed - previousVerticalSpeed);
+}
 
+-(void)setGround
+{
+	if (playerVerticalSpeed == 0)
+	{
+		groundY = player.position.y;
+	}
+}
+-(void)playerFallCheck
+{
+	if (player.position.y < playerPreviousHeight) 
+	{
+		playerIsFalling = TRUE;
+	}
+	else 
+	{
+		playerIsFalling = FALSE;
+	}
+
+	playerPreviousHeight = player.position.y;
 }
 
 -(void)gravityCheck
 {
 	if (player.position.y > screenSize.height/4) 
 	{
+		previousVerticalSpeed = playerVerticalSpeed;
 		playerVerticalSpeed = playerVerticalSpeed + playerGravity;
 		player.position = ccp(player.position.x,player.position.y + playerVerticalSpeed);
 	}
+	else 
+	{
+		playerVerticalSpeed = 0;
+	}
+
 }
 
 -(void)playerJumpCheck
 {
-	if (jumpButton.buttonHeld) 
+	if (jumpButton.buttonHeld && !playerIsFalling && player.position.y - groundY < groundY + playerJumpVelocity) 
 	{
-		playerVerticalSpeed = 0;
+		NSLog(@"Player Position: %f", player.position.y);
+		NSLog(@"Ground Position: %f", groundY);
+		NSLog(@"Jump Height: %f", player.position.y - groundY);
 		player.position = ccp(player.position.x,player.position.y + playerJumpVelocity);
+	}
+	if (playerIsFalling) 
+	{
+		[jumpButton unselected];
+		NSLog(@"Player Position: %f", player.position.y);
+		NSLog(@"Ground Position: %f", groundY);
+		NSLog(@"Jump Height: %f", player.position.y - groundY);
 	}
 }
 
@@ -189,6 +233,7 @@
 	if (player.position.y < screenSize.height/4) 
 	{
 		player.position = ccp(player.position.x,screenSize.height/4);
+		playerVerticalSpeed = 0;
 	}
 	if (player.position.y > screenSize.height - player.contentSize.height/2) 
 	{

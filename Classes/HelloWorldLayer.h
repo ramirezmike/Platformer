@@ -18,14 +18,20 @@
 	CGSize screenSize;
 	CCSprite *player;
 	
+	BOOL playerIsFalling;
+	
 	float playerMaxSpeed;
 	float playerAcceleration;
 	float playerDeceleration;
 	float playerJumpVelocity;
 	float playerSpeed;
 	float playerVerticalSpeed;
+	float previousVerticalSpeed;
 	float playerFriction;
 	float playerGravity;
+	float playerPreviousHeight;
+	
+	float groundY;
 	
 	CCMenuItemSpriteHoldable *leftButton;
 	CCMenuItemSpriteHoldable *rightButton;
@@ -40,6 +46,8 @@
 -(void)wallBoundriesCheck;
 -(void)gravityCheck;
 -(void)playerJumpCheck;
+-(void)playerFallCheck;
+-(void)setGround;
 
 
 @end
