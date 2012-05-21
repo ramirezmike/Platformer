@@ -10,6 +10,8 @@
 // Import the interfaces
 #import "HelloWorldLayer.h"
 #import "CCMenuItemHoldable.h"
+#import "DebugLayer.h"
+
 
 // HelloWorldLayer implementation
 @implementation HelloWorldLayer
@@ -29,6 +31,50 @@
 	return scene;
 }
 
+-(void)debugButtonTapped:(id)sender
+{
+	DebugLayer *debug = [DebugLayer node];
+	[debug.maxJumpTimeLabel setString:[NSString stringWithFormat:@"%f",maxJumpTime]];
+	[debug.minJumpTimeLabel setString:[NSString stringWithFormat:@"%f",minJumpTime]];
+	[debug.gravityRateLabel setString:[NSString stringWithFormat:@"%f",gravityRate]];
+	[debug.jumpRateLabel setString:[NSString stringWithFormat:@"%f",jumpRate]];
+
+
+	[debug addControls];
+	[self addChild:debug];
+}
+
+-(void)createDebugButton
+{
+	debugButton = [CCMenuItemImage
+		itemFromNormalImage:@"debug.png" selectedImage:@"debugSel.png"
+		target:self selector:@selector(debugButtonTapped:)];
+	debugButton.position = ccp(300,430);
+	CCMenu *debugMenu = [CCMenu menuWithItems:debugButton, nil];
+	debugMenu.position = CGPointZero;
+	[self addChild:debugMenu];
+}
+
+-(void)setMaxJumpTime:(float) time
+{
+	maxJumpTime = time;
+}
+
+-(void)setMinJumpTime:(float) time
+{
+	minJumpTime = time;
+}
+
+-(void)setGravityRate:(float) rate
+{
+	gravityRate = rate;
+}
+
+-(void)setJumpRate:(float)rate
+{
+	jumpRate = rate;
+}
+
 -(void)buttonTapped:(id)sender
 {
 
@@ -37,6 +83,7 @@
 -(void)jumpButtonTapped:(id)sender
 {
 	//	groundY = player.position.y;
+
 }
 
 // on "init" you need to initialize your instance
@@ -58,6 +105,19 @@
 		playerSpeed = 0;
 		playerVerticalSpeed = 0;
 		playerPreviousHeight = 0;
+		
+		
+		playerIsJumping = FALSE;
+		playerOnGround = TRUE;
+		gravityRate = -0.21875;
+		jumpRate = 6.5;
+		maxJumpTime = 20;
+		minJumpTime = 7;
+		currentJumpTime = 0;
+		
+		[self createDebugButton];
+
+		
 		
 		leftButton = [CCMenuItemSpriteHoldable
 		itemFromNormalSprite:[CCSprite spriteWithFile:@"Icon-Small.png"] selectedSprite:
@@ -90,14 +150,73 @@
 
 -(void)nextFrame:(ccTime)dt
 {
-		[self setGround];
-		[self playerFrictionCheck];
 		[self playerMovementCheck];
+		[self playerFrictionCheck];
+
+		/*
+		[self setGround];
 		[self playerFallCheck];
 		[self playerJumpCheck];
 		[self gravityCheck];
-		[self wallBoundriesCheck];
 		//NSLog(@"VeticalSpeed: %f",playerVerticalSpeed - previousVerticalSpeed);
+		*/
+		
+		[self isPlayerJumping];
+		[self playerJumpMovement];
+		[self wallBoundriesCheck];
+		//player.position = ccp(player.position.x, player.position.y + playerVerticalSpeed);
+		NSLog(@"VeticalSpeed: %f", currentJumpTime);
+
+
+}
+
+-(void)playerJumpMovement
+{
+	if (playerIsJumping) 
+	{
+		if (currentJumpTime > minJumpTime) 
+		{
+			player.position = ccp(player.position.x, player.position.y + jumpRate);
+			currentJumpTime--;
+		}
+		if (currentJumpTime > 0 && currentJumpTime <= minJumpTime) 
+		{
+			playerVerticalSpeed = playerVerticalSpeed + gravityRate;
+			player.position = ccp(player.position.x, player.position.y + playerVerticalSpeed + jumpRate);
+			currentJumpTime--;
+
+		}
+		if (currentJumpTime == 0)
+		{
+			playerVerticalSpeed = playerVerticalSpeed + gravityRate;
+			player.position = ccp(player.position.x, player.position.y + playerVerticalSpeed);
+		}
+
+
+	}
+}
+
+-(void)isPlayerJumping
+{
+	if (jumpButton.buttonHeld && playerOnGround && !playerIsJumping) 
+	{
+		playerOnGround = FALSE;
+		playerIsJumping = TRUE;
+		playerVerticalSpeed = 0;
+		NSLog(@"Player is Jumping!");
+		currentJumpTime = maxJumpTime;
+	}
+	if (!jumpButton.buttonHeld && !playerOnGround) 
+	{
+		currentJumpTime = 0;
+	}
+	if (!jumpButton.buttonHeld && playerOnGround) 
+	{
+		playerIsJumping = FALSE;
+		NSLog(@"Player is not Jumping!");
+
+	}
+
 }
 
 -(void)setGround
@@ -233,7 +352,9 @@
 	if (player.position.y < screenSize.height/4) 
 	{
 		player.position = ccp(player.position.x,screenSize.height/4);
-		playerVerticalSpeed = 0;
+		//playerVerticalSpeed = 0;
+		playerOnGround = TRUE;
+		//currentJumpTime = 0;
 	}
 	if (player.position.y > screenSize.height - player.contentSize.height/2) 
 	{

@@ -18,6 +18,19 @@
 	CGSize screenSize;
 	CCSprite *player;
 	
+	CCMenuItem *debugButton;
+
+	
+	BOOL playerIsJumping;
+	float gravityRate;
+	float jumpRate;
+	float maxJumpTime;
+	float minJumpTime;
+	float currentJumpTime;
+	BOOL playerOnGround;
+	
+	
+	
 	BOOL playerIsFalling;
 	
 	float playerMaxSpeed;
@@ -48,6 +61,14 @@
 -(void)playerJumpCheck;
 -(void)playerFallCheck;
 -(void)setGround;
+
+
+-(void)isPlayerJumping;
+-(void)playerJumpMovement;
+-(void)setMaxJumpTime:(float) time;
+-(void)setMinJumpTime:(float) time;
+-(void)setGravityRate:(float) rate;
+-(void)setJumpRate:(float) rate;
 
 
 @end
