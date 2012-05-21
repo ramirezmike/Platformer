@@ -10,6 +10,7 @@
 // When you import this file, you import all the cocos2d classes
 #import "cocos2d.h"
 #import "CCMenuItemHoldable.h"
+@class DebugLayer;
 
 
 // HelloWorldLayer
@@ -19,33 +20,24 @@
 	CCSprite *player;
 	
 	CCMenuItem *debugButton;
-
+	DebugLayer *debug;
 	
 	BOOL playerIsJumping;
+	BOOL playerOnGround;
 	float gravityRate;
 	float jumpRate;
 	float maxJumpTime;
 	float minJumpTime;
 	float currentJumpTime;
-	BOOL playerOnGround;
-	
-	
-	
-	BOOL playerIsFalling;
-	
+	float playerVerticalSpeed;
+		
 	float playerMaxSpeed;
 	float playerAcceleration;
 	float playerDeceleration;
-	float playerJumpVelocity;
 	float playerSpeed;
-	float playerVerticalSpeed;
-	float previousVerticalSpeed;
 	float playerFriction;
-	float playerGravity;
-	float playerPreviousHeight;
-	
-	float groundY;
-	
+
+		
 	CCMenuItemSpriteHoldable *leftButton;
 	CCMenuItemSpriteHoldable *rightButton;
 	CCMenuItemSpriteHoldable *jumpButton;
@@ -57,11 +49,6 @@
 -(void)playerFrictionCheck;
 -(void)playerMovementCheck;
 -(void)wallBoundriesCheck;
--(void)gravityCheck;
--(void)playerJumpCheck;
--(void)playerFallCheck;
--(void)setGround;
-
 
 -(void)isPlayerJumping;
 -(void)playerJumpMovement;

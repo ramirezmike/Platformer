@@ -33,7 +33,7 @@
 
 -(void)debugButtonTapped:(id)sender
 {
-	DebugLayer *debug = [DebugLayer node];
+	debug = [DebugLayer node];
 	[debug.maxJumpTimeLabel setString:[NSString stringWithFormat:@"%f",maxJumpTime]];
 	[debug.minJumpTimeLabel setString:[NSString stringWithFormat:@"%f",minJumpTime]];
 	[debug.gravityRateLabel setString:[NSString stringWithFormat:@"%f",gravityRate]];
@@ -82,7 +82,6 @@
 
 -(void)jumpButtonTapped:(id)sender
 {
-	//	groundY = player.position.y;
 
 }
 
@@ -98,13 +97,10 @@
 		
 		playerAcceleration = 0.046875;
 		playerFriction = 0.046875;
-		playerGravity = -0.21875;
 		playerDeceleration = 0.5;
-		playerJumpVelocity = 6.5;
 		playerMaxSpeed = 6;
 		playerSpeed = 0;
 		playerVerticalSpeed = 0;
-		playerPreviousHeight = 0;
 		
 		
 		playerIsJumping = FALSE;
@@ -152,22 +148,10 @@
 {
 		[self playerMovementCheck];
 		[self playerFrictionCheck];
-
-		/*
-		[self setGround];
-		[self playerFallCheck];
-		[self playerJumpCheck];
-		[self gravityCheck];
-		//NSLog(@"VeticalSpeed: %f",playerVerticalSpeed - previousVerticalSpeed);
-		*/
-		
 		[self isPlayerJumping];
 		[self playerJumpMovement];
 		[self wallBoundriesCheck];
-		//player.position = ccp(player.position.x, player.position.y + playerVerticalSpeed);
-		NSLog(@"VeticalSpeed: %f", currentJumpTime);
-
-
+		//NSLog(@"VeticalSpeed: %f", currentJumpTime);
 }
 
 -(void)playerJumpMovement
@@ -184,15 +168,12 @@
 			playerVerticalSpeed = playerVerticalSpeed + gravityRate;
 			player.position = ccp(player.position.x, player.position.y + playerVerticalSpeed + jumpRate);
 			currentJumpTime--;
-
 		}
 		if (currentJumpTime == 0)
 		{
 			playerVerticalSpeed = playerVerticalSpeed + gravityRate;
 			player.position = ccp(player.position.x, player.position.y + playerVerticalSpeed);
 		}
-
-
 	}
 }
 
@@ -214,64 +195,10 @@
 	{
 		playerIsJumping = FALSE;
 		NSLog(@"Player is not Jumping!");
-
 	}
 
 }
 
--(void)setGround
-{
-	if (playerVerticalSpeed == 0)
-	{
-		groundY = player.position.y;
-	}
-}
--(void)playerFallCheck
-{
-	if (player.position.y < playerPreviousHeight) 
-	{
-		playerIsFalling = TRUE;
-	}
-	else 
-	{
-		playerIsFalling = FALSE;
-	}
-
-	playerPreviousHeight = player.position.y;
-}
-
--(void)gravityCheck
-{
-	if (player.position.y > screenSize.height/4) 
-	{
-		previousVerticalSpeed = playerVerticalSpeed;
-		playerVerticalSpeed = playerVerticalSpeed + playerGravity;
-		player.position = ccp(player.position.x,player.position.y + playerVerticalSpeed);
-	}
-	else 
-	{
-		playerVerticalSpeed = 0;
-	}
-
-}
-
--(void)playerJumpCheck
-{
-	if (jumpButton.buttonHeld && !playerIsFalling && player.position.y - groundY < groundY + playerJumpVelocity) 
-	{
-		NSLog(@"Player Position: %f", player.position.y);
-		NSLog(@"Ground Position: %f", groundY);
-		NSLog(@"Jump Height: %f", player.position.y - groundY);
-		player.position = ccp(player.position.x,player.position.y + playerJumpVelocity);
-	}
-	if (playerIsFalling) 
-	{
-		[jumpButton unselected];
-		NSLog(@"Player Position: %f", player.position.y);
-		NSLog(@"Ground Position: %f", groundY);
-		NSLog(@"Jump Height: %f", player.position.y - groundY);
-	}
-}
 
 -(void)playerFrictionCheck
 {
@@ -340,7 +267,7 @@
 
 -(void)wallBoundriesCheck
 {
-	if (player.position.x < -10) 
+	if (player.position.x < -15) 
 	{
 		player.position = ccp( 480+10, player.position.y );
 	}
@@ -352,9 +279,7 @@
 	if (player.position.y < screenSize.height/4) 
 	{
 		player.position = ccp(player.position.x,screenSize.height/4);
-		//playerVerticalSpeed = 0;
 		playerOnGround = TRUE;
-		//currentJumpTime = 0;
 	}
 	if (player.position.y > screenSize.height - player.contentSize.height/2) 
 	{
@@ -373,6 +298,9 @@
 	[player release];
 	[leftButton release];
 	[rightButton release];
+	[jumpButton release];
+	[debugButton release];
+	[debug release];
 	[super dealloc];
 }
 @end
