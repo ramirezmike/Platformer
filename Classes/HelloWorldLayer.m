@@ -93,7 +93,12 @@
 	if( (self=[super initWithColor:ccc4(255,255,255,255)])) {
 		screenSize = [[CCDirector sharedDirector] winSize];	
 		player = [CCSprite spriteWithFile:@"player.png"];
-		player.position = ccp(screenSize.width/2,screenSize.height/4);
+		player.position = ccp(screenSize.width/2,screenSize.height/4 + 2);
+		
+
+		platform = [CCSprite spriteWithFile:@"platform.png"];
+		platform.position = ccp(screenSize.width/2,screenSize.height/4 - platform.contentSize.height*2);
+
 		
 		playerAcceleration = 0.046875;
 		playerFriction = 0.046875;
@@ -101,6 +106,7 @@
 		playerMaxSpeed = 6;
 		playerSpeed = 0;
 		playerVerticalSpeed = 0;
+		maxFallRate = 6.5;
 		
 		
 		playerIsJumping = FALSE;
@@ -137,6 +143,7 @@
 		[self addChild:directionMenu];
 		[self addChild:jumpMenu];
 		[self addChild:player];
+		[self addChild:platform];
 		
 		[self schedule:@selector(nextFrame:)];
 
@@ -144,14 +151,61 @@
 	return self;
 }
 
+-(void)checkIntersections
+{
+	[self setPlayerSensors];
+
+	CGRect platformRect = CGRectMake(
+				platform.position.x - (platform.contentSize.width/2), 
+				platform.position.y - (platform.contentSize.height/2),
+				platform.contentSize.width, 
+				platform.contentSize.height);
+				
+	if (CGRectIntersectsRect(leftFloorSide, platformRect) || CGRectIntersectsRect(rightFloorSide, platformRect))
+	{
+		NSLog(@"INTERSECTION");
+//		player.position = ccp(player.position.x,(platform.position.y + platform.contentSize.height/2) + 2);
+		playerOnGround = TRUE;
+		playerVerticalSpeed = 0;
+		playerIsJumping = FALSE;
+
+	}
+	if (!CGRectIntersectsRect(leftFloorSide, platformRect) && !CGRectIntersectsRect(rightFloorSide, platformRect)) 
+	{
+		playerOnGround = FALSE;
+		playerIsJumping = TRUE;
+	}
+
+
+}
+
+-(void)setPlayerSensors
+{
+	leftFloorSide = CGRectMake(
+				player.position.x - (player.contentSize.width/2), 
+				player.position.y - (player.contentSize.height/2) - 1,
+				1, 
+				1);
+	rightFloorSide = CGRectMake(
+				player.position.x + (player.contentSize.width/2), 
+				player.position.y - (player.contentSize.height/2) - 1,
+				1, 
+				1);
+}
+
 -(void)nextFrame:(ccTime)dt
 {
+		if (abs(playerVerticalSpeed) >= maxFallRate) 
+		{
+			playerVerticalSpeed = -maxFallRate;
+		}
 		[self playerMovementCheck];
 		[self playerFrictionCheck];
 		[self isPlayerJumping];
 		[self playerJumpMovement];
 		[self wallBoundriesCheck];
-		//NSLog(@"VeticalSpeed: %f", currentJumpTime);
+		[self checkIntersections];
+		NSLog(@"VeticalSpeed: %f", playerVerticalSpeed);
 }
 
 -(void)playerJumpMovement
@@ -184,7 +238,7 @@
 		playerOnGround = FALSE;
 		playerIsJumping = TRUE;
 		playerVerticalSpeed = 0;
-		NSLog(@"Player is Jumping!");
+		//NSLog(@"Player is Jumping!");
 		currentJumpTime = maxJumpTime;
 	}
 	if (!jumpButton.buttonHeld && !playerOnGround) 
@@ -194,7 +248,7 @@
 	if (!jumpButton.buttonHeld && playerOnGround) 
 	{
 		playerIsJumping = FALSE;
-		NSLog(@"Player is not Jumping!");
+		//NSLog(@"Player is not Jumping!");
 	}
 
 }
@@ -278,8 +332,14 @@
 	}
 	if (player.position.y < screenSize.height/4) 
 	{
-		player.position = ccp(player.position.x,screenSize.height/4);
-		playerOnGround = TRUE;
+		//player.position = ccp(player.position.x,screenSize.height/4);
+		//playerOnGround = TRUE;
+		
+		
+	}
+	if (player.position.y < 0) 
+	{
+		player.position = ccp(player.position.x,screenSize.height + 10);
 	}
 	if (player.position.y > screenSize.height - player.contentSize.height/2) 
 	{

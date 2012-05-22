@@ -18,6 +18,10 @@
 {
 	CGSize screenSize;
 	CCSprite *player;
+	CCSprite *platform;
+	
+	CGRect leftFloorSide;
+	CGRect rightFloorSide;
 	
 	CCMenuItem *debugButton;
 	DebugLayer *debug;
@@ -30,6 +34,7 @@
 	float minJumpTime;
 	float currentJumpTime;
 	float playerVerticalSpeed;
+	float maxFallRate;
 		
 	float playerMaxSpeed;
 	float playerAcceleration;
@@ -49,6 +54,11 @@
 -(void)playerFrictionCheck;
 -(void)playerMovementCheck;
 -(void)wallBoundriesCheck;
+
+-(void)setPlayerSensors;
+-(void)checkIntersections;
+
+
 
 -(void)isPlayerJumping;
 -(void)playerJumpMovement;
