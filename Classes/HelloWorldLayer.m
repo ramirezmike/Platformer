@@ -96,8 +96,15 @@
 		player.position = ccp(screenSize.width/2,screenSize.height/4 + 2);
 		
 
-		platform = [CCSprite spriteWithFile:@"platform.png"];
-		platform.position = ccp(screenSize.width/2,screenSize.height/4 - platform.contentSize.height*2);
+		platform1 = [CCSprite spriteWithFile:@"platform.png"];
+		platform1.position = ccp(screenSize.width/2,screenSize.height/4 - platform1.contentSize.height*2);
+		
+		platform2 = [CCSprite spriteWithFile:@"platform.png"];
+		platform2.position = ccp(screenSize.width/2 + screenSize.width/4,screenSize.height/2.5);
+		
+		_platforms = [[NSMutableArray alloc]init];
+		[_platforms addObject:platform1];
+		[_platforms addObject:platform2];
 
 		
 		playerAcceleration = 0.046875;
@@ -143,7 +150,8 @@
 		[self addChild:directionMenu];
 		[self addChild:jumpMenu];
 		[self addChild:player];
-		[self addChild:platform];
+		[self addChild:platform1];
+		[self addChild:platform2];
 		
 		[self schedule:@selector(nextFrame:)];
 
@@ -153,6 +161,9 @@
 
 -(void)checkIntersections
 {
+
+	for (CCSprite *platform in _platforms) 
+	{
 	[self setPlayerSensors];
 
 	CGRect platformRect = CGRectMake(
@@ -168,14 +179,16 @@
 		playerOnGround = TRUE;
 		playerVerticalSpeed = 0;
 		playerIsJumping = FALSE;
+		break;
 
 	}
 	if (!CGRectIntersectsRect(leftFloorSide, platformRect) && !CGRectIntersectsRect(rightFloorSide, platformRect)) 
 	{
 		playerOnGround = FALSE;
 		playerIsJumping = TRUE;
+		//break;
 	}
-
+}
 
 }
 
@@ -205,7 +218,7 @@
 		[self playerJumpMovement];
 		[self wallBoundriesCheck];
 		[self checkIntersections];
-		NSLog(@"VeticalSpeed: %f", playerVerticalSpeed);
+		//NSLog(@"VeticalSpeed: %f", playerVerticalSpeed);
 }
 
 -(void)playerJumpMovement
@@ -356,6 +369,7 @@
 	// cocos2d will automatically release all the children (Label)
 	// don't forget to call "super dealloc"
 	[player release];
+	[_platforms release];
 	[leftButton release];
 	[rightButton release];
 	[jumpButton release];

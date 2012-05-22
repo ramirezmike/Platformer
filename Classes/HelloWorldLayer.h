@@ -18,7 +18,10 @@
 {
 	CGSize screenSize;
 	CCSprite *player;
-	CCSprite *platform;
+	CCSprite *platform1;
+	CCSprite *platform2;
+	
+	NSMutableArray* _platforms;
 	
 	CGRect leftFloorSide;
 	CGRect rightFloorSide;
